@@ -30,7 +30,8 @@ a private sandbox disk image. The client requires the resulting disk ID through
 ## Prerequisites
 
 - Azure CLI authenticated with `az login`
-- `uv`
+- Python 3.10 or later
+- The `azure-containerapps-sandbox` and `azure-identity` Python packages
 - Permission to create sandboxes, volumes, and snapshots in the configured
    sandbox group
 - A Container Apps [Sandbox Group](https://learn.microsoft.com/azure/container-apps/sandboxes-quickstart-portal#create-a-sandbox-group).
@@ -75,6 +76,18 @@ session is sufficient for local use. If service-principal authentication is
 used instead, also set the standard `AZURE_TENANT_ID`, `AZURE_CLIENT_ID`, and
 `AZURE_CLIENT_SECRET` variables.
 
+Use any Python environment and package manager that suits your development
+workflow. For example, after activating a virtual environment, install the
+client dependencies with pip:
+
+```text
+python -m pip install azure-containerapps-sandbox azure-identity
+```
+
+The commands below use `python` for portability. Depending on your environment,
+the interpreter command may instead be `python3`, `py`, or a managed command
+such as `uv run python`.
+
 `ANIMAL_PORT` and `ANIMAL_MOUNTPOINT` are optional service settings inside the
 sandbox. They default to `8080` and `/mnt/shared`; the supplied image and client
 already use those defaults, so they do not need to be set locally.
@@ -92,12 +105,14 @@ above.
 
 ## Run
 
-From the repository root:
+From the repository root, run the client with your chosen Python interpreter:
 
-```powershell
-uv run python client/client.py `
-  --auto-suspend-seconds 30
+```text
+python client/client.py --auto-suspend-seconds 30
 ```
+
+For example, the equivalent uv command is
+`uv run python client/client.py --auto-suspend-seconds 30`.
 
 To reuse the newest existing sandbox labeled
 `scenario=sandbox-fundamentals`, or create one with that label when none
@@ -106,14 +121,14 @@ prompts. Answer `n` at the reuse prompt to always create a new sandbox.
 
 For non-interactive label selection, use:
 
-```powershell
-uv run python client/client.py --reuse-sandbox
+```text
+python client/client.py --reuse-sandbox
 ```
 
 Specify another exact label with `KEY=VALUE`:
 
-```powershell
-uv run python client/client.py --reuse-sandbox scenario=my-scenario
+```text
+python client/client.py --reuse-sandbox scenario=my-scenario
 ```
 
 A reused sandbox and its volume are not deleted when this client exits. The
@@ -157,8 +172,8 @@ volume's contents into the snapshot.
 
 1. Start the first run with resource cleanup disabled:
 
-   ```powershell
-   uv run python client/client.py --keep-resources
+   ```text
+   python client/client.py --keep-resources
    ```
 
 2. Press Enter at **Start from a snapshot?**, then answer `n` when asked whether
@@ -170,8 +185,8 @@ volume's contents into the snapshot.
 4. Exit. The client prints that it is keeping the sandbox and volume.
 5. Start the client again without `--keep-resources`:
 
-   ```powershell
-   uv run python client/client.py
+   ```text
+   python client/client.py
    ```
 
 6. Answer `y` at **Start from a snapshot?** and select the recorded snapshot.
@@ -197,11 +212,3 @@ volume's contents into the snapshot.
 
 The Blob checkpoint is deliberately not loaded during resume. That keeps the
 memory-resume proof independent from the durable-volume proof.
-
-## Local test
-
-The service test uses only Python's standard library plus pytest:
-
-```powershell
-uv run pytest tests/test_server.py -q
-```
